@@ -89,6 +89,11 @@ function routerComponentDirective($animate, $controller, $compile, $rootScope, $
       $templateRequest(componentTemplateUrl).
           then(function(templateHtml) {
 
+            // If the route changed before we retrieved the template, then there is nothing else to do.
+            // TODO at the moment, this is a bad solution and hides the fact that we are compiling the same
+            //   directive twice.
+            if (!elt[0].parentNode) return;
+
             myOwnRouterComponentCtrl.template = templateHtml;
 
             var clone = $transclude(childScope, function(clone) {
