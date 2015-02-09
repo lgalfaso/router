@@ -125,6 +125,32 @@ describe('routerViewPort', function () {
   }));
 
 
+  it('should update anchors hrefs in nested viewports', inject(function (router) {
+
+    put('childRouter', '<div><a router-link="two">inner</a> { <div router-view-port></div> }</div>');
+    $controllerProvider.register('ChildRouterController', function (router) {
+      router.config([
+        { path: '/b', component: 'one' },
+        { path: '/c', component: 'two' }
+      ]);
+    });
+
+    put('router', '<div><a router-link="user">outer</a> { <div router-view-port></div> }</div>');
+    router.config([
+      { path: '/a', component: 'childRouter' },
+      { path: '/d', component: 'user' }
+    ]);
+
+    compile('<router-component component-name="router"></router-component>');
+
+    router.navigate('/a/b');
+    $rootScope.$digest(true);
+
+    expect(elt.find('a')[0].getAttribute('href')).toBe('../d');
+    expect(elt.find('a')[1].getAttribute('href')).toBe('./c');
+  }));
+
+
   it('should allow params in routerLink directive', inject(function (router) {
     put('router', '<div>outer { <div router-view-port></div> }</div>');
     put('one', '<div><a router-link="two({param: \'lol\'})">{{number}}</a></div>');
